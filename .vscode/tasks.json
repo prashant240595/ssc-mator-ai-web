@@ -1,0 +1,63 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dev (Vite)",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": { "kind": "build", "isDefault": true },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "ready in|Local:",
+          "endsPattern": "error|Error"
+        }
+      }
+    },
+    {
+      "label": "Typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "npm run build",
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Preview built site (Cloudflare runtime)",
+      "type": "shell",
+      "command": "npm run cf:dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "wrangler",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Ready on|localhost:8787",
+          "endsPattern": "error|Error"
+        }
+      }
+    },
+    {
+      "label": "Deploy to Cloudflare (build + push)",
+      "type": "shell",
+      "command": "npm run deploy",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Tail production logs",
+      "type": "shell",
+      "command": "npm run cf:tail",
+      "isBackground": true,
+      "problemMatcher": { "owner": "wrangler", "pattern": { "regexp": "^$" } }
+    }
+  ]
+}
