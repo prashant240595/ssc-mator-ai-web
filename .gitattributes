@@ -1,0 +1,19 @@
+# Normalize line endings in the repo; check out with native endings locally.
+# Without this, Windows commits CRLF into files and the Linux CI build can differ.
+* text=auto eol=lf
+
+# Files that must stay LF regardless of platform
+*.sh text eol=lf
+wrangler.jsonc text eol=lf
+
+# Binary assets — never touch line endings
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.pdf binary

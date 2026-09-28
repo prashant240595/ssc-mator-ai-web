@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Authenticated can read all results" ON public.student_results;
+CREATE POLICY "Users read own results" ON public.student_results FOR SELECT TO authenticated USING (auth.uid() = user_id);

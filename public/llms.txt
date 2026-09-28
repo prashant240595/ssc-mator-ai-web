@@ -1,0 +1,13 @@
+# SSC Mentor AI
+
+> AI-powered SSC CGL exam preparation: previous year question papers with solutions, full-length mock tests, subject practice, and a personal AI mentor.
+
+SSC Mentor AI helps Indian Staff Selection Commission (SSC) CGL aspirants prepare with previous year papers (PYQs) grouped by year and shift, timed mock tests, topic-wise practice, and an AI coach that gives a Hinglish action plan based on attempt history.
+
+## Pages
+
+- [Home](/): Overview of SSC CGL prep features — PYQs, mock tests, practice and AI coaching.
+- [Exam Series & Previous Year Papers](/exams): SSC CGL previous year papers and mock test series, organised by year and shift.
+- [Practice](/practice): Subject- and topic-wise SSC CGL practice with instant feedback.
+- [Mock Tests](/mock-tests): Timed full-length SSC CGL mock tests with question palette and instant scoring.
+- [AI Mentor](/ai-coach): Personal AI coach that analyses your attempts and gives a Hinglish action plan.

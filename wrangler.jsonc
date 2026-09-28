@@ -1,0 +1,29 @@
+// Cloudflare Workers config for manual / CI deploys.
+// Nitro also auto-generates .output/server/wrangler.json on every `npm run build`;
+// this file is the stable, cross-platform source of truth (its paths use forward
+// slashes so they work on Linux CI, unlike the Windows-generated one).
+//
+// Deploy:  npm run deploy
+// Preview: npm run cf:dev
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ssc-mentor-ai",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat"],
+  "no_bundle": true,
+  "rules": [{ "type": "ESModule", "globs": ["**/*.mjs", "**/*.js"] }],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".output/public"
+  },
+  "observability": {
+    "enabled": true
+  }
+  // Secrets are NOT declared here. Add them once per environment with:
+  //   npx wrangler secret put GEMINI_API_KEY
+  //   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+  //   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
+  // Public build-time values (VITE_*) go in the Cloudflare Pages dashboard
+  // under Settings -> Environment variables, not in this file.
+}
