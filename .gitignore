@@ -20,6 +20,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Supabase CLI local state (machine-specific, holds project refs and temp files)
+supabase/.temp/
+
 # Secrets — never commit these
 .env
 .env.*

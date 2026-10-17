@@ -10,15 +10,24 @@ Migrated off Lovable (paid) to **Cloudflare Workers** on 2026-10-17.
   this machine with a Windows access violation (outdated VC++ redistributable)
 
 ## Supabase
-Project ref is **`djvywlfkwtakkbagksgh`**. The old ref `fjpmohfovknezctoqdew`
-that Lovable had written into `.env` no longer exists — that project was deleted,
-so its 8,368 questions and 124 blog posts are unrecoverable. The user will
-re-upload questions.
+Project ref is **`djvywlfkwtakkbagksgh`** (Postgres 17, region ap-northeast-2).
+Linked locally via `npx supabase link`. All 51 migrations in
+`supabase/migrations/` were pushed on 2026-10-17, giving 27 tables and 17
+functions. Every table is empty — the user will re-upload questions.
 
-The new project started with an empty `public` schema (0 tables, 0 functions).
-The 51 files in `supabase/migrations/` were authored against the old project and
-have not yet been applied. `supabase/COMBINED_SCHEMA.sql` is those migrations
-concatenated, for the dashboard SQL editor.
+The old ref `fjpmohfovknezctoqdew` that Lovable had written into `.env` no longer
+exists — that project was deleted, so its 8,368 questions and 124 blog posts are
+unrecoverable.
+
+Keys live in `.env` (gitignored): `SUPABASE_PUBLISHABLE_KEY` for the browser,
+`SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_SECRET_KEY` for the server. Never commit
+them. `supabase/.temp/` is gitignored — it holds machine-specific CLI state.
+
+To inspect the schema later:
+```
+npx supabase migration list
+node scripts/schema-state.mjs djvywlfkwtakkbagksgh <service_role_jwt>
+```
 
 ## Auth
 Google sign-in was rewired from `@lovable.dev/cloud-auth-js` (a Lovable-hosted
