@@ -27,15 +27,25 @@ Once you connect the domain, also allow `https://sscmentorai.online`.
    | Application type | **Web application** |
    | Name | `SSC Mentor AI` |
    | Authorized JavaScript origins | `https://ssc-mentor-ai.prashantsingh-240567.workers.dev` |
-   | Authorized redirect URIs | `https://ssc-mentor-ai.prashantsingh-240567.workers.dev/` |
+   | Authorized redirect URIs | `https://djvywlfkwtakkbagksgh.supabase.co/auth/v1/callback` |
 
-   Note the **trailing slash** on the redirect URI. `redirect_uri_mismatch` is
-   almost always this: the browser sends the slash, the registered value lacks
-   it, and Google rejects the request as malformed rather than unauthorized.
+   **The redirect URI is Supabase's callback, not your site's URL.** This is the
+   single most common mistake. Supabase owns the token exchange with Google: the
+   browser goes to Google, Google sends the code back to Supabase's endpoint, and
+   only then does Supabase forward the session to your site. So Google never
+   sees your domain in `redirect_uri` — it sees Supabase's.
 
-   One entry is enough for the workers.dev host. Google matches the redirect URI
-   Google Cloud registered against what the app sends — you do not need a
-   separate entry per route.
+   Trace it yourself with:
+   ```
+   node scripts/oauth-trace.mjs
+   ```
+   The `redirect_uri=` value it prints is exactly what belongs in the form.
+
+   The trailing slash matters: register the callback with a trailing slash to
+   match the URL the browser sends.
+
+   Your own domain belongs in **Authorized JavaScript origins**, not in the
+   redirect list.
 
 5. Click **Create**. A popup shows two values:
    - **Client ID** — a long string ending in `.apps.googleusercontent.com`
@@ -45,12 +55,13 @@ Keep that popup open; you need both in the next step.
 
 ## If you later connect your own domain
 
-Add it as a second origin and a second redirect URI rather than editing the
-existing ones, so the workers.dev address keeps working:
+Add it as a second **JavaScript origin** — not a second redirect URI. The
+redirect URI stays Supabase's callback regardless of which domain the user signs
+in from.
 
 ```
-Origin:      https://sscmentorai.online
-Redirect:    https://sscmentorai.online/
+Origins:  https://ssc-mentor-ai.prashantsingh-240567.workers.dev
+          https://sscmentorai.online
 ```
 
 ## 2. Paste them into Supabase
@@ -65,9 +76,10 @@ Redirect:    https://sscmentorai.online/
 
 Still in Supabase → **Authentication** → **URL Configuration**:
 
-**Site URL** — set to your real domain:
+**Site URL** — set to the address you are actually signing in from. Until the
+domain is connected, that is the workers.dev URL:
 ```
-https://sscmentorai.online
+https://ssc-mentor-ai.prashantsingh-240567.workers.dev
 ```
 
 **Redirect URLs** — add each of these:
@@ -88,11 +100,11 @@ This trips people up, so to be explicit:
 
 | List | Where | What it validates |
 |---|---|---|
-| Authorized redirect URIs | Google Cloud console | The URL Google itself redirects to |
+| Authorized redirect URIs | Google Cloud console | Supabase's callback — `https://<project-ref>.supabase.co/auth/v1/callback` |
+| Authorized JavaScript origins | Google Cloud console | Your own domain, where the app lives |
 | Redirect URLs | Supabase → URL Configuration | Which hosts the browser may return to |
 
-Both must permit the address you are signing in from. The Google list needs an
-exact match; the Supabase list accepts wildcards.
+The Google redirect list does **not** contain your site. The Supabase list does.
 
 ## 4. Test it
 
@@ -100,12 +112,12 @@ Open `/login` on the live site, click **Continue with Google**, and confirm you
 land back signed in as `prashant.singh.2405@gmail.com` — that address is the
 admin, per `ADMIN_EMAIL` in `src/lib/auth.tsx`.
 
-If Google still shows `redirect_uri_mismatch`, click **See error details** on
-that page — Google prints the exact `redirect_uri` it received. Compare it
-character by character against your Google Cloud entry; a trailing slash is the
-usual culprit. If the URL it reports looks like a Supabase callback rather than
-your own site, that is expected: the Google Cloud list only needs your domain,
-because Supabase generates its own callback separately.
+If Google still shows `redirect_uri_mismatch`, run:
+```
+node scripts/oauth-trace.mjs
+```
+It prints the exact `redirect_uri` your project sends. Register that string in
+Google Cloud verbatim — trailing slash included.
 
 ## A note on credentials
 
