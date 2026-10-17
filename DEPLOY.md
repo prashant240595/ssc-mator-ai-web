@@ -84,9 +84,20 @@ npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
 > full database access. It lives only in Cloudflare's encrypted store — never in
 > the repo and never in a `VITE_`-prefixed variable.
 
-### 1.5 Trigger a build and confirm
+### 1.5 Register the workers.dev subdomain
 
-Push anything (or hit **Retry deployment**). When it goes green, visit
+New Cloudflare accounts have no `workers.dev` subdomain yet, and `wrangler deploy`
+will refuse to publish until one exists. This one-time step needs a browser:
+
+<https://dash.cloudflare.com/ee4895a5387a1bcc0aae05ff4a9f6f52/workers/onboarding>
+
+Pick any available subdomain (for example `prashantsingh`). Once registered, the
+Worker is reachable at `https://ssc-mentor-ai.<subdomain>.workers.dev` and
+`npm run deploy` works from then on.
+
+### 1.6 Trigger a build and confirm
+
+Push anything, or run `npm run deploy`. When it goes green, visit
 `https://ssc-mentor-ai.<your-subdomain>.workers.dev`.
 
 ### 1.6 Point your domain at Cloudflare
