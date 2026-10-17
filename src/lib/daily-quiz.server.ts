@@ -72,7 +72,10 @@ function readBilingual(v: unknown, fallback = ""): Bilingual {
   return { en: s, hi: s };
 }
 
-const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"];
+// Gemini retired gemini-2.5-flash-lite and gemini-2.5-pro for new API keys
+// (both now return 404), so the fallbacks moved to the 3.x ids. gemini-2.5-flash
+// is the only 2.x model still reachable and is the primary.
+const MODELS = ["gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro-preview"];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
