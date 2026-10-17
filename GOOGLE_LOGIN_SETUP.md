@@ -27,13 +27,31 @@ Once you connect the domain, also allow `https://sscmentorai.online`.
    | Application type | **Web application** |
    | Name | `SSC Mentor AI` |
    | Authorized JavaScript origins | `https://ssc-mentor-ai.prashantsingh-240567.workers.dev` |
-   | Authorized redirect URIs | `https://ssc-mentor-ai.prashantsingh-240567.workers.dev` |
+   | Authorized redirect URIs | `https://ssc-mentor-ai.prashantsingh-240567.workers.dev/` |
+
+   Note the **trailing slash** on the redirect URI. `redirect_uri_mismatch` is
+   almost always this: the browser sends the slash, the registered value lacks
+   it, and Google rejects the request as malformed rather than unauthorized.
+
+   One entry is enough for the workers.dev host. Google matches the redirect URI
+   Google Cloud registered against what the app sends — you do not need a
+   separate entry per route.
 
 5. Click **Create**. A popup shows two values:
    - **Client ID** — a long string ending in `.apps.googleusercontent.com`
    - **Client secret** — starts with `GOCSPX-`
 
 Keep that popup open; you need both in the next step.
+
+## If you later connect your own domain
+
+Add it as a second origin and a second redirect URI rather than editing the
+existing ones, so the workers.dev address keeps working:
+
+```
+Origin:      https://sscmentorai.online
+Redirect:    https://sscmentorai.online/
+```
 
 ## 2. Paste them into Supabase
 
@@ -56,11 +74,25 @@ https://sscmentorai.online
 ```
 https://ssc-mentor-ai.prashantsingh-240567.workers.dev/**
 https://sscmentorai.online/**
-https://localhost:8080/**
+http://localhost:8080/**
 ```
 
-The `/**` suffix lets any path under each host come back through the callback.
-While testing locally that is what makes `npm run dev` work too.
+This is the Supabase-side allow-list, and it is separate from the Google Cloud
+list. Supabase sends the browser to Google with its own callback URL, and
+accepts the browser's return trip only for hosts on this list. The `/**`
+wildcard allows any path beneath each host.
+
+## Which list needs what
+
+This trips people up, so to be explicit:
+
+| List | Where | What it validates |
+|---|---|---|
+| Authorized redirect URIs | Google Cloud console | The URL Google itself redirects to |
+| Redirect URLs | Supabase → URL Configuration | Which hosts the browser may return to |
+
+Both must permit the address you are signing in from. The Google list needs an
+exact match; the Supabase list accepts wildcards.
 
 ## 4. Test it
 
@@ -68,9 +100,12 @@ Open `/login` on the live site, click **Continue with Google**, and confirm you
 land back signed in as `prashant.singh.2405@gmail.com` — that address is the
 admin, per `ADMIN_EMAIL` in `src/lib/auth.tsx`.
 
-If Google shows `redirect_uri_mismatch`, the exact URL you typed in step 1 does
-not match what the browser sent. Copy the URL from the error message and add it
-to both lists above.
+If Google still shows `redirect_uri_mismatch`, click **See error details** on
+that page — Google prints the exact `redirect_uri` it received. Compare it
+character by character against your Google Cloud entry; a trailing slash is the
+usual culprit. If the URL it reports looks like a Supabase callback rather than
+your own site, that is expected: the Google Cloud list only needs your domain,
+because Supabase generates its own callback separately.
 
 ## A note on credentials
 
