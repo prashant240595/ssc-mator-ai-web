@@ -30,6 +30,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
 import { useIsAppUser } from "@/lib/app-user";
+import { FREE_ACCESS_FOR_ALL } from "@/lib/access";
 import { DailyQuizCard } from "@/components/DailyQuizCard";
 import { StreakCard } from "@/components/StreakCard";
 import { RevisionCard } from "@/components/RevisionCard";
@@ -496,10 +497,14 @@ function Dashboard() {
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold uppercase tracking-wider text-primary">Android App</p>
               <p className="mt-0.5 text-sm font-bold sm:text-base">
-                Pay in the website or free use in the app
+                {FREE_ACCESS_FOR_ALL
+                  ? "Free on the website and in the app"
+                  : "Pay in the website or free use in the app"}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Website use is paid — the Android app stays free with every feature unlocked.
+                {FREE_ACCESS_FOR_ALL
+                  ? "Every feature is unlocked right now — practice, mock tests and AI Coach on the web or on your phone."
+                  : "Website use is paid — the Android app stays free with every feature unlocked."}
               </p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-elevated">

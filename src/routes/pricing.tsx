@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -7,24 +7,41 @@ import { PLAY_STORE_URL } from "@/components/WebPaywall";
 import { getPaymentOptions, startPayment, verifyRazorpayPayment } from "@/lib/payments.functions";
 import { useSubscription } from "@/lib/use-subscription";
 import { useAuth } from "@/lib/auth";
+import { FREE_ACCESS_FOR_ALL } from "@/lib/access";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
-    meta: [
-      { title: "Pricing — SSC Mentor AI Web Pass (from ₹30)" },
-      {
-        name: "description",
-        content:
-          "Unlock full website access to SSC Mentor AI: ₹30 for 1 month, ₹160 for 6 months or ₹300 for 1 year. Pay by UPI, or install the Android app and use everything free.",
-      },
-      { property: "og:title", content: "SSC Mentor AI Web Pass — ₹30 / month, ₹300 / year" },
-      {
-        property: "og:description",
-        content: "UPI payment via Razorpay. The Android app stays completely free.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
+    meta: FREE_ACCESS_FOR_ALL
+      ? [
+          { title: "Free Access — SSC Mentor AI" },
+          {
+            name: "description",
+            content:
+              "Every SSC Mentor AI feature is free on the website right now: practice, previous year papers, mock tests, AI Coach, Daily Quiz and Smart Revision. No payment needed.",
+          },
+          { property: "og:title", content: "SSC Mentor AI — free access for everyone" },
+          {
+            property: "og:description",
+            content: "All features are free on the website right now. No payment needed.",
+          },
+          { property: "og:type", content: "website" },
+          { name: "twitter:card", content: "summary_large_image" },
+        ]
+      : [
+          { title: "Pricing — SSC Mentor AI Web Pass (from ₹30)" },
+          {
+            name: "description",
+            content:
+              "Unlock full website access to SSC Mentor AI: ₹30 for 1 month, ₹160 for 6 months or ₹300 for 1 year. Pay by UPI, or install the Android app and use everything free.",
+          },
+          { property: "og:title", content: "SSC Mentor AI Web Pass — ₹30 / month, ₹300 / year" },
+          {
+            property: "og:description",
+            content: "UPI payment via Razorpay. The Android app stays completely free.",
+          },
+          { property: "og:type", content: "website" },
+          { name: "twitter:card", content: "summary_large_image" },
+        ],
   }),
   component: PricingPage,
 });
@@ -80,10 +97,15 @@ function PricingPage() {
   const verify = useServerFn(verifyRazorpayPayment);
 
   useEffect(() => {
+    if (FREE_ACCESS_FOR_ALL) return;
     getPaymentOptions()
       .then((o) => setOptions({ razorpay: o.razorpay, phonepe: o.phonepe }))
       .catch(() => setOptions({ razorpay: false, phonepe: false }));
   }, []);
+
+  // Free access: there is nothing to sell, so skip the checkout entirely.
+  // Every hook above has already run, so this early return is safe.
+  if (FREE_ACCESS_FOR_ALL) return <FreeAccessPage />;
 
   const selected = PLAN_UI.find((p) => p.code === plan)!;
 
@@ -255,5 +277,51 @@ function PricingPage() {
         </div>
       </div>
     </>
+  );
+}
+
+/** Shown while `FREE_ACCESS_FOR_ALL` is on — no prices, no checkout. */
+function FreeAccessPage() {
+  return (
+    <div className="mx-auto max-w-3xl py-6">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-3 py-1 text-xs font-semibold text-success">
+        <Sparkles className="h-3.5 w-3.5" /> Free for everyone
+      </span>
+      <h1 className="mt-3 text-2xl font-bold">Everything is free right now</h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        No payment and no trial limit. Sign in and every feature below is open to you on the
+        website.
+      </p>
+
+      <ul className="mt-5 space-y-2 text-sm">
+        {PERKS.map((p) => (
+          <li key={p} className="flex gap-2">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+            <span className="text-muted-foreground">{p}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+        <Link
+          to="/practice"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-elevated transition hover:opacity-95"
+        >
+          Start practising
+        </Link>
+        <button
+          onClick={() => window.open(PLAY_STORE_URL, "_blank", "noopener,noreferrer")}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
+        >
+          <Download className="h-4 w-4" />
+          Get the Android app
+        </button>
+      </div>
+
+      <p className="mt-4 text-xs text-muted-foreground">
+        Payments are switched off while free access is on. Nothing is charged, and any pass bought
+        earlier stays valid for its full period.
+      </p>
+    </div>
   );
 }

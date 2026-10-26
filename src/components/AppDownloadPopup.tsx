@@ -64,9 +64,9 @@ export function AppDownloadPopup() {
         <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-elevated">
           <Smartphone className="h-6 w-6" />
         </span>
-        <h2 className="mt-4 text-lg font-bold">Pay in the website or free use in the app</h2>
+        <h2 className="mt-4 text-lg font-bold">Study on the go with the app</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Website use is paid. Use the Android app free forever — unlimited practice, exams, AI coach and more.
+          Practice, mock tests, AI Coach and Daily Quiz on your phone — every feature unlocked.
         </p>
         <div className="mt-5 flex flex-col gap-2">
           <button

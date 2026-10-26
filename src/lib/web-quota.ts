@@ -4,7 +4,11 @@
  * The Android app (crypto-verified via app_token) is always free and unlimited.
  * Browser users get FREE_LIMIT uses of every paid feature, after which they are
  * asked to install the app or buy a pass. Daily Quiz stays free for everyone.
+ *
+ * While FREE_ACCESS_FOR_ALL is on, nothing is gated: `featureForPath` returns
+ * null, so AppLayout shows neither the free-use banner nor the paywall.
  */
+import { FREE_ACCESS_FOR_ALL } from "@/lib/access";
 
 export const FREE_LIMIT = 0;
 
@@ -54,6 +58,7 @@ const PATH_MAP: { prefix: string; key: FeatureKey }[] = [
 ];
 
 export function featureForPath(pathname: string): FeatureKey | null {
+  if (FREE_ACCESS_FOR_ALL) return null;
   const hit = PATH_MAP.find(
     (m) => pathname === m.prefix || pathname.startsWith(m.prefix + "/"),
   );

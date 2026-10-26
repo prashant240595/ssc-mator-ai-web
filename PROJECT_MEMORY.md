@@ -34,7 +34,24 @@ Google sign-in was rewired from `@lovable.dev/cloud-auth-js` (a Lovable-hosted
 OAuth proxy) to `supabase.auth.signInWithOAuth` in `src/lib/auth.tsx`. The
 `src/integrations/lovable/` directory and the `cloud-auth-js` dependency were
 deleted. The Supabase Google provider must be enabled with the new domain added
-to the redirect URL list, or sign-in loops.
+to the redirect URL list, or sign-in loops. The redirect URI Google validates is
+Supabase's own callback (`https://<ref>.supabase.co/auth/v1/callback`), not the
+site URL — `node scripts/oauth-trace.mjs` prints the exact value.
+
+## Free access (2026-10-26)
+The website is free for every signed-in user. `src/lib/access.ts` holds
+`FREE_ACCESS_FOR_ALL = true`, the only switch needed to restore the web pass:
+
+- `use-subscription.ts` reports an active pass for everyone and skips the query
+- `web-quota.ts#featureForPath` returns null, so AppLayout renders neither the
+  free-use banner nor the paywall
+- `pricing.tsx` renders `FreeAccessPage` and never calls the payment server fns
+
+No gating code was deleted, `subscriptions` rows are untouched, and Razorpay /
+PhonePe still work when the flag goes back to false. Guest (anonymous)
+restrictions are separate from payment: guests still see the "please login"
+modal because their progress is not saved.
+
 
 ## Corrections made to my own earlier claims
 - I said the Worker bundle would fail to deploy over a 3 MB gzip limit. Wrong:
