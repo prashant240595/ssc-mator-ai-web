@@ -7,6 +7,30 @@ Cloudflare's **Workers Builds** feature pulls the repo from GitHub, runs the
 build, and publishes. You never run a deploy command by hand after the initial
 setup — you edit code locally, push, and the site updates.
 
+## Current state (checked 2026-11-25)
+
+| Thing | State |
+|---|---|
+| Worker `ssc-mentor-ai` | Deployed and healthy on `https://ssc-mentor-ai.prashantsingh-240567.workers.dev` |
+| Secrets | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY` set. `FIREBASE_SERVICE_ACCOUNT` is **missing** (push notifications stay off) |
+| `sscmentorai.online` | Still served by **Lovable** (`185.158.133.1`, DNS at **BigRock**) — not by the Worker |
+| `www.sscmentorai.online` | No DNS record at all |
+
+So the Worker is live, but the domain never moved off Lovable. Going live on the
+custom domain needs the nameservers moved to Cloudflare once:
+
+1. Cloudflare dashboard → **Add a site** → `sscmentorai.online` → **Free** plan.
+2. Copy the two nameservers it prints.
+3. BigRock → Manage Domain → **Name Servers** → replace `dns1..dns4.bigrock.in`.
+4. `npm run cf:go-live` — attaches `sscmentorai.online` and `www` to the Worker
+   and verifies both over HTTPS. Safe to re-run; it skips what already exists.
+
+`www` is 301'd to the apex inside `src/server.ts` (`canonicalRedirect`), so no
+redirect rule is needed in the dashboard. Zone creation and DNS edits need a
+token with **Zone:Edit + DNS:Edit**; the `wrangler login` OAuth token only has
+zone:read, so step 1 is a dashboard click unless `CLOUDFLARE_API_TOKEN` is set
+in `.env`.
+
 ---
 
 ## 1. One-time setup

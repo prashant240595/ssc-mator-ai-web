@@ -14,7 +14,8 @@
     "cf:dev": "wrangler dev --config wrangler.jsonc",
     "cf:deploy": "wrangler deploy --config wrangler.jsonc",
     "deploy": "npm run build && npm run cf:deploy",
-    "cf:tail": "wrangler tail --config wrangler.jsonc"
+    "cf:tail": "wrangler tail --config wrangler.jsonc",
+    "cf:go-live": "node scripts/cf-go-live.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.50",

@@ -7,6 +7,21 @@ type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
+const APEX_HOST = "sscmentorai.online";
+
+// Search engines should only ever index one copy of a page, so `www` is 301'd
+// to the apex host before any rendering happens. The Worker also answers on
+// *.workers.dev — that host is not ours to redirect, so it passes through.
+function canonicalRedirect(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (url.hostname !== `www.${APEX_HOST}`) return null;
+
+  url.protocol = "https:";
+  url.hostname = APEX_HOST;
+  url.port = "";
+  return new Response(null, { status: 301, headers: { location: url.toString() } });
+}
+
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
 async function getServerEntry(): Promise<ServerEntry> {
@@ -39,6 +54,9 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const redirect = canonicalRedirect(request);
+    if (redirect) return redirect;
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
