@@ -121,6 +121,33 @@ if (!zone) {
   process.exit(0);
 }
 
+// A Worker custom domain cannot be attached while an A/AAAA/CNAME already owns
+// the hostname. Adding the site imports the old Lovable A record, so that has to
+// go first — otherwise Cloudflare answers 409 and the domain keeps pointing at
+// Lovable. Deleting needs DNS:Edit; the wrangler OAuth token only has zone:read,
+// in which case the exact record to delete is printed instead.
+async function clearConflicts(zoneId, hostname) {
+  const listed = await api(`/zones/${zoneId}/dns_records?name=${hostname}&per_page=50`);
+  if (!listed.ok) return { cleared: true, records: [] };
+
+  const records = (listed.result ?? []).filter((r) => ["A", "AAAA", "CNAME"].includes(r.type));
+  if (records.length === 0) return { cleared: true, records };
+
+  for (const record of records) {
+    const del = await api(`/zones/${zoneId}/dns_records/${record.id}`, { method: "DELETE" });
+    if (!del.ok) {
+      console.log(
+        `\n${hostname}: ${record.type} ${record.name} → ${record.content} blocks the attach ` +
+          `(${del.status} ${describe(del.errors)}).`,
+      );
+      console.log("  Delete it in the dashboard: DNS → Records → the row above → Delete.");
+      return { cleared: false, records };
+    }
+    console.log(`\n${hostname}: deleted stale ${record.type} record → ${record.content}`);
+  }
+  return { cleared: true, records };
+}
+
 const existing = await api(`/accounts/${account.id}/workers/domains?per_page=100`);
 const attached = new Set((existing.result ?? []).map((d) => d.hostname));
 
@@ -129,6 +156,10 @@ for (const hostname of [DOMAIN, WWW]) {
     console.log(`\n${hostname}: already attached`);
     continue;
   }
+
+  const { cleared } = await clearConflicts(zone.id, hostname);
+  if (!cleared) continue;
+
   const res = await api(`/accounts/${account.id}/workers/domains`, {
     method: "POST",
     body: JSON.stringify({

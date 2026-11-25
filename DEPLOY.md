@@ -25,6 +25,11 @@ custom domain needs the nameservers moved to Cloudflare once:
 4. `npm run cf:go-live` — attaches `sscmentorai.online` and `www` to the Worker
    and verifies both over HTTPS. Safe to re-run; it skips what already exists.
 
+Adding the site imports the old **Lovable `A` record** (`185.158.133.1`) for the
+apex. A Worker custom domain cannot coexist with it, so the record has to be
+deleted first (DNS → Records → Delete). `cf:go-live` does that automatically
+when the token has **DNS:Edit**; otherwise it prints the exact row to delete.
+
 `www` is 301'd to the apex inside `src/server.ts` (`canonicalRedirect`), so no
 redirect rule is needed in the dashboard. Zone creation and DNS edits need a
 token with **Zone:Edit + DNS:Edit**; the `wrangler login` OAuth token only has
